@@ -1,0 +1,11 @@
+/dist
+/log
+/node_modules
+Dockerfile
+.dockerignore
+.git
+.gitignore
+Makefile
+.eslintrc.js
+jest.config.js
+nodemon.json
