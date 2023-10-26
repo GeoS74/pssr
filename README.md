@@ -4,7 +4,7 @@
 
 ### Docker
 
-[Образ сервиса на hub.docker](https://hub.docker.com/repository/docker/geos74/pssr/general)
+[Образ сервиса на hub.docker](https://hub.docker.com/r/geos74/pssr)
 
  #### environment
 
