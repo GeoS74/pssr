@@ -10,6 +10,11 @@ export default {
     host: process.env.REACT_HOST,
     port: process.env.REACT_PORT,
   },
+  db: {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 6379,
+    pass: process.env.DB_PASS || 'mypassword',
+  },
   log: {
     file: 'app.log',
   },
