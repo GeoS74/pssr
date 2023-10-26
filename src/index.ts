@@ -31,7 +31,9 @@ server.on('request', (req: IncomingMessage, res: ServerResponse<IncomingMessage>
       // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
       const html = await page.content();
 
-      (await db).set(req.url || '', html);
+      (await db).set(req.url || '', html, {
+        EX: +config.key.ttl
+      });
 
       res.setHeader('content-type', 'text/html; charset=utf-8');
       res.statusCode = 200;

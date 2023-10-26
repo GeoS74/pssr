@@ -15,6 +15,9 @@ export default {
     port: process.env.DB_PORT || 6379,
     pass: process.env.DB_PASS || 'mypassword',
   },
+  key: {
+    ttl: process.env.TTL_KEY || 60*60*24*7,
+  },
   log: {
     file: 'app.log',
   },
