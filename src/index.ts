@@ -18,7 +18,6 @@ server.on('request', (req: IncomingMessage, res: ServerResponse<IncomingMessage>
         res.setHeader('content-type', 'text/html; charset=utf-8');
         res.statusCode = 200;
         res.end(cache);
-        logger.info('отдаём из кэша');
         return;
       }
 
