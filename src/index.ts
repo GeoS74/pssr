@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import {
   IncomingMessage, Server, ServerResponse, createServer,
 } from 'http';
@@ -7,11 +7,15 @@ import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
 
+const browser = puppeteer.launch({
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  headless: 'new',
+});
+
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   try {
-    logger.info(req.headers);
     const cache = await (await db).get(req.url || '');
 
     if (cache) {
@@ -21,18 +25,15 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: 'new',
-    });
+    let page: Page | null = await (await browser).newPage();
 
-    const page = await browser.newPage();
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
     const html = await page.content();
+
     await page.close();
-    await browser.close();
+    page = null;
 
     if (html.search('404 Страница не существует') !== -1) {
       res.statusCode = 404;
