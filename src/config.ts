@@ -16,7 +16,7 @@ export default {
     pass: process.env.DB_PASS || 'mypassword',
   },
   key: {
-    ttl: process.env.TTL_KEY || 60*60*24*7,
+    ttl: process.env.TTL_KEY || 60 * 60 * 24 * 7,
   },
   log: {
     file: 'app.log',

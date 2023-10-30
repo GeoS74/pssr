@@ -31,7 +31,7 @@ server.on('request', (req: IncomingMessage, res: ServerResponse<IncomingMessage>
       const html = await page.content();
 
       (await db).set(req.url || '', html, {
-        EX: +config.key.ttl
+        EX: +config.key.ttl,
       });
 
       res.setHeader('content-type', 'text/html; charset=utf-8');
@@ -44,6 +44,7 @@ server.on('request', (req: IncomingMessage, res: ServerResponse<IncomingMessage>
       logger.error(error.message);
       res.statusCode = 500;
       res.end(_errorToJSON('internal server error'));
+      process.exit(1); // restart container
     }
   }
 });
