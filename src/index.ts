@@ -11,6 +11,7 @@ const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServ
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   try {
+    logger.info(req.headers);
     const cache = await (await db).get(req.url || '');
 
     if (cache) {
