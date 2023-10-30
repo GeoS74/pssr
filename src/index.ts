@@ -9,39 +9,47 @@ import db from './libs/db';
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
-server.on('request', (req: IncomingMessage, res: ServerResponse<IncomingMessage>): void => {
+server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   try {
-    (async () => {
-      const cache = await (await db).get(req.url || '');
+    const cache = await (await db).get(req.url || '');
 
-      if (cache) {
-        res.setHeader('content-type', 'text/html; charset=utf-8');
-        res.statusCode = 200;
-        res.end(cache);
-        return;
-      }
-
-      const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        headless: 'new',
-      });
-      const page = await browser.newPage();
-      await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
-      // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
-      const html = await page.content();
-
-      (await db).set(req.url || '', html, {
-        EX: +config.key.ttl,
-      });
-
+    if (cache) {
       res.setHeader('content-type', 'text/html; charset=utf-8');
       res.statusCode = 200;
+      res.end(cache);
+      return;
+    }
+
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new',
+    });
+
+    const page = await browser.newPage();
+    await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
+    // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
+
+    const html = await page.content();
+    await page.close();
+    await browser.close();
+
+    if (html.search('404 Страница не существует') !== -1) {
+      res.statusCode = 404;
       res.end(html);
-      await browser.close();
-    })();
+      return;
+    }
+
+    (await db).set(req.url || '', html, {
+      EX: +config.key.ttl,
+    });
+
+    res.setHeader('content-type', 'text/html; charset=utf-8');
+    res.statusCode = 200;
+    res.end(html);
   } catch (error) {
     if (_isNodeError(error)) {
       logger.error(error.message);
+      res.setHeader('content-type', 'application/json');
       res.statusCode = 500;
       res.end(_errorToJSON('internal server error'));
       process.exit(1); // restart container
