@@ -11,7 +11,7 @@ const browser = puppeteer.launch({
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
   headless: 'new',
 })
-  .then(browser => browser.createIncognitoBrowserContext());
+  .then(async browser => await browser.createIncognitoBrowserContext());
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
