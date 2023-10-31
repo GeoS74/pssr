@@ -37,10 +37,10 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     await page.$$eval('#root', div => {
       if(div[0].innerHTML) {
-        logger.info('root render ok')
+        console.log('root render ok');
         return;
       }
-      logger.warn('root not render')
+      console.log('root not render');
     });
 
 
