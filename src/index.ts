@@ -35,15 +35,6 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     await delay(+config.node.delay);
 
-    await page.$$eval('#root', div => {
-      if(div[0].innerHTML) {
-        logger.info('root render ok');
-        return;
-      }
-      logger.info('root not render');
-    });
-
-
     const html = await page.content();
 
     await page.close();
