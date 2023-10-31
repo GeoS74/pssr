@@ -39,7 +39,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
-    await delay(500);
+    await delay(100);
 
     const html = await page.content();
 
