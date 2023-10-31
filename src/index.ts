@@ -1,4 +1,4 @@
-import puppeteer, { Page } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import {
   IncomingMessage, Server, ServerResponse, createServer,
 } from 'http';
@@ -7,11 +7,11 @@ import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
 
-const browser = puppeteer.launch({
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  headless: 'new',
-})
-  .then(async browser => await browser.createIncognitoBrowserContext());
+// const browser = puppeteer.launch({
+//   args: ['--no-sandbox', '--disable-setuid-sandbox'],
+//   headless: 'new',
+// })
+//   .then(async browser => await browser.createIncognitoBrowserContext());
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
@@ -26,7 +26,12 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    let page: Page | null = await (await browser).newPage();
+    let browser: Browser | null = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new',
+    });
+
+    let page: Page | null = await browser.newPage();
 
     await page.setCacheEnabled(false);
 
@@ -37,6 +42,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     await page.close();
     page = null;
+    await browser.close();
+    browser = null;
+
 
     if (html.search('404 Страница не существует') !== -1) {
       res.statusCode = 404;
