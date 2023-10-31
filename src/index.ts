@@ -7,10 +7,11 @@ import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
 
-// const browser = puppeteer.launch({
-//   args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//   headless: 'new',
-// });
+const browser = puppeteer.launch({
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  headless: 'new',
+})
+  .then(browser => browser.createIncognitoBrowserContext());
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
@@ -25,14 +26,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: 'new',
-    });
+    let page: Page | null = await (await browser).newPage();
 
-    let page: Page | null = await browser.newPage();
-
-    // await page.setCacheEnabled(false);
+    await page.setCacheEnabled(false);
 
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
