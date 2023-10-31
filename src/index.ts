@@ -34,7 +34,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
-    await delay(+config.render.delay);
+    await page.waitForSelector('#root:first-child');
+
+    // await delay(+config.render.delay);
 
     const html = await page.content();
 
