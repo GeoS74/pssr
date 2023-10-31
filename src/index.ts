@@ -40,7 +40,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     const dom = new JSDOM(html);
     const root = dom.window.document.querySelector('#root')?.innerHTML;
-    logger.info(dom.window.document.querySelector('meta[name="description"]')?.textContent);
+
     logger.info(dom.window.document.querySelector('meta[name="description"]')?.getAttribute('content'));
     if(root) {
       logger.info('root render');
