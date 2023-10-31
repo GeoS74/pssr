@@ -34,12 +34,13 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
-    await delay(+config.node.delay);
+    await delay(+config.render.delay);
 
     const html = await page.content();
 
     const dom = new JSDOM(html);
     const root = dom.window.document.querySelector('#root')?.innerHTML;
+    logger.info(dom.window.document.querySelector('meta[name="description"]'))
     if(root) {
       logger.info('root render');
     } else {

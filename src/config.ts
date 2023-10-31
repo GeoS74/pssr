@@ -1,7 +1,6 @@
 export default {
   node: {
     env: process.env.NODE_ENV || 'dev',
-    delay: process.env.DELAY || 0,
   },
   server: {
     host: process.env.SERVER_HOST || 'localhost',
@@ -18,6 +17,9 @@ export default {
   },
   key: {
     ttl: process.env.TTL_KEY || 60 * 60 * 24 * 7,
+  },
+  render: {
+    delay: process.env.RENDER_DELAY || 0,
   },
   log: {
     file: 'app.log',
