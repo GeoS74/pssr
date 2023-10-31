@@ -17,14 +17,14 @@ const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServ
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   try {
-    const cache = await (await db).get(req.url || '');
+    // const cache = await (await db).get(req.url || '');
 
-    if (cache) {
-      res.setHeader('content-type', 'text/html; charset=utf-8');
-      res.statusCode = 200;
-      res.end(cache);
-      return;
-    }
+    // if (cache) {
+    //   res.setHeader('content-type', 'text/html; charset=utf-8');
+    //   res.statusCode = 200;
+    //   res.end(cache);
+    //   return;
+    // }
 
     let page: Page | null = await (await browser).newPage();
 
@@ -37,10 +37,10 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     await page.$$eval('#root', div => {
       if(div[0].innerHTML) {
-        console.log('root render ok');
+        logger.info('root render ok');
         return;
       }
-      console.log('root not render');
+      logger.info('root not render');
     });
 
 
@@ -55,9 +55,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    (await db).set(req.url || '', html, {
-      EX: +config.key.ttl,
-    });
+    // (await db).set(req.url || '', html, {
+    //   EX: +config.key.ttl,
+    // });
 
     res.setHeader('content-type', 'text/html; charset=utf-8');
     res.statusCode = 200;
