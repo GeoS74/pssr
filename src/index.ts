@@ -7,6 +7,7 @@ import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
 import { delay } from './libs/delay';
+import {JSDOM} from 'jsdom';
 
 const browser = puppeteer.launch({
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -36,6 +37,15 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await delay(+config.node.delay);
 
     const html = await page.content();
+
+    const dom = new JSDOM(html);
+    const root = dom.window.document.querySelector('#root')?.innerHTML;
+    if(root) {
+      logger.info('root render');
+    } else {
+      logger.warn('root empty' + root);
+    }
+     
 
     await page.close();
     page = null;
