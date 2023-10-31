@@ -51,6 +51,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     }
      
 
+    
     await page.close();
     page = null;
 
