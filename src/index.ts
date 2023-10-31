@@ -27,6 +27,8 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     let page: Page | null = await (await browser).newPage();
 
+    await page.setCacheEnabled(false);
+
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
