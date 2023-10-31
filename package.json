@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/jsdom": "^21.1.4",
+    "jsdom": "^22.1.0",
     "log4js": "^6.9.1",
     "puppeteer": "^21.3.8",
     "redis": "^4.6.10"
