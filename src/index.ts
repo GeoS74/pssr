@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import {
   IncomingMessage, Server, ServerResponse, createServer,
 } from 'http';
@@ -12,7 +12,6 @@ const browser = puppeteer.launch({
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
   headless: 'new',
 });
-//   .then(async browser => await browser.createIncognitoBrowserContext());
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
@@ -27,11 +26,6 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    // let browser: Browser | null = await puppeteer.launch({
-    //   args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    //   headless: 'new',
-    // });
-
     let page: Page | null = await (await browser).newPage();
 
     await page.setCacheEnabled(false);
@@ -39,15 +33,21 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
-    await delay(100);
+    await delay(+config.node.delay);
+
+    await page.$$eval('#root', div => {
+      if(div[0].innerHTML) {
+        logger.info('root render ok')
+        return;
+      }
+      logger.warn('root not render')
+    });
+
 
     const html = await page.content();
 
     await page.close();
     page = null;
-    // await browser.close();
-    // browser = null;
-
 
     if (html.search('404 Страница не существует') !== -1) {
       res.statusCode = 404;
