@@ -6,11 +6,12 @@ import config from './config';
 import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
+import { delay } from './libs/delay';
 
-// const browser = puppeteer.launch({
-//   args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//   headless: 'new',
-// })
+const browser = puppeteer.launch({
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  headless: 'new',
+});
 //   .then(async browser => await browser.createIncognitoBrowserContext());
 
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
@@ -26,24 +27,26 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    let browser: Browser | null = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: 'new',
-    });
+    // let browser: Browser | null = await puppeteer.launch({
+    //   args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    //   headless: 'new',
+    // });
 
-    let page: Page | null = await browser.newPage();
+    let page: Page | null = await (await browser).newPage();
 
     await page.setCacheEnabled(false);
 
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
+    await delay(500);
+
     const html = await page.content();
 
     await page.close();
     page = null;
-    await browser.close();
-    browser = null;
+    // await browser.close();
+    // browser = null;
 
 
     if (html.search('404 Страница не существует') !== -1) {
