@@ -18,9 +18,6 @@ export default {
   key: {
     ttl: process.env.TTL_KEY || 60 * 60 * 24 * 7,
   },
-  render: {
-    delay: process.env.RENDER_DELAY || 0,
-  },
   log: {
     file: 'app.log',
   },

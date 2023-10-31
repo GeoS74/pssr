@@ -6,8 +6,6 @@ import config from './config';
 import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
 import db from './libs/db';
-import { delay } from './libs/delay';
-import {JSDOM} from 'jsdom';
 
 const browser = puppeteer.launch({
   args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -18,14 +16,14 @@ const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServ
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   try {
-    // const cache = await (await db).get(req.url || '');
+    const cache = await (await db).get(req.url || '');
 
-    // if (cache) {
-    //   res.setHeader('content-type', 'text/html; charset=utf-8');
-    //   res.statusCode = 200;
-    //   res.end(cache);
-    //   return;
-    // }
+    if (cache) {
+      res.setHeader('content-type', 'text/html; charset=utf-8');
+      res.statusCode = 200;
+      res.end(cache);
+      return;
+    }
 
     let page: Page | null = await (await browser).newPage();
 
@@ -36,20 +34,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     await page.waitForSelector('#root div');
 
-    // await delay(+config.render.delay);
-
     const html = await page.content();
-
-    const dom = new JSDOM(html);
-    const root = dom.window.document.querySelector('#root')?.innerHTML;
-
-    logger.info(dom.window.document.querySelector('meta[name="description"]')?.getAttribute('content'));
-    if(root) {
-      logger.info('root render');
-    } else {
-      logger.warn('root empty' + root);
-    }
-     
 
     await page.close();
     page = null;
@@ -60,9 +45,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    // (await db).set(req.url || '', html, {
-    //   EX: +config.key.ttl,
-    // });
+    (await db).set(req.url || '', html, {
+      EX: +config.key.ttl,
+    });
 
     res.setHeader('content-type', 'text/html; charset=utf-8');
     res.statusCode = 200;
