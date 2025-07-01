@@ -32,7 +32,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
     // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
-    await page.waitForSelector('#root div');
+    await page.waitForSelector(config.react.rootSelector);
 
     const html = await page.content();
 

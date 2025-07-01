@@ -7,8 +7,9 @@ export default {
     port: process.env.SERVER_PORT || 3250,
   },
   react: {
-    host: process.env.REACT_HOST,
-    port: process.env.REACT_PORT,
+    host: process.env.REACT_HOST || '127.0.0.1',
+    port: process.env.REACT_PORT || '5500',
+    rootSelector: process.env.ROOT_SELECTOR || '#root div',
   },
   db: {
     host: process.env.DB_HOST || 'localhost',
