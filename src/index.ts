@@ -5,6 +5,7 @@ import {
 import config from './config';
 import { logger } from './libs/logger';
 import { _errorToJSON, _isNodeError } from './libs/errors';
+// import path from 'path';
 import db from './libs/db';
 
 const browser = puppeteer.launch({
@@ -27,15 +28,28 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     let page: Page | null = await (await browser).newPage();
 
-    // debag
-    page.on('request', req => console.log('Request:', req.url()));
+    // Вставляем полифил для URL.parse
+    await page.evaluateOnNewDocument(() => {
+      if (!('parse' in URL)) {
+        (URL as any).parse = function (url: string) {
+          const parsed = new URL(url);
+          return {
+            protocol: parsed.protocol,
+            hostname: parsed.hostname,
+            pathname: parsed.pathname,
+            query: parsed.searchParams,
+            href: parsed.href
+          };
+        };
+      }
+    });
 
     await page.setCacheEnabled(false);
 
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
-    // await page.screenshot({path: path.join(__dirname, 'screenshot.png')});
 
     await page.waitForSelector(config.react.rootSelector);
+    // await page.screenshot({ path: path.join(__dirname, 'screenshot.png') });
 
     const html = await page.content();
 
