@@ -27,6 +27,9 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
 
     let page: Page | null = await (await browser).newPage();
 
+    // debag
+    page.on('request', req => console.log('Request:', req.url()));
+
     await page.setCacheEnabled(false);
 
     await page.goto(`http://${config.react.host}:${config.react.port}${req.url}`);
