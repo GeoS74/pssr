@@ -18,29 +18,67 @@ const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServ
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
   const targetURL = `http://${config.react.host}:${config.react.port}${req.url}`;
   try {
-    const cache = await (await db).get(req.url || '');
 
-    if (cache) {
-      res.setHeader('content-type', 'text/html; charset=utf-8');
-      res.statusCode = 200;
-      res.end(cache);
-      return;
+    if (!config.cache.bypass) {
+      const cache = await (await db).get(req.url || '');
+
+      if (cache) {
+        res.setHeader('content-type', 'text/html; charset=utf-8');
+        res.statusCode = 200;
+        res.end(cache);
+        return;
+      }
     }
 
     let page: Page | null = await (await browser).newPage();
 
-    // Вставляем полифил для URL.parse
+    // Вставляем полифилы для URL.parse и Promise.withResolvers
     await page.evaluateOnNewDocument(() => {
       if (!('parse' in URL)) {
         (URL as any).parse = function (url: string) {
-          const parsed = new URL(url);
-          return {
-            protocol: parsed.protocol,
-            hostname: parsed.hostname,
-            pathname: parsed.pathname,
-            query: parsed.searchParams,
-            href: parsed.href
-          };
+          try {
+            // Если URL валидный - парсим стандартным способом
+            const parsed = new URL(url);
+            return {
+              protocol: parsed.protocol,
+              hostname: parsed.hostname,
+              pathname: parsed.pathname,
+              query: parsed.searchParams,
+              href: parsed.href,
+              origin: parsed.origin,
+              port: parsed.port,
+              hash: parsed.hash
+            };
+          } catch (e) {
+            // Фоллбек для невалидных URL
+            //Может быть такая ошибка TypeError: Failed to construct 'URL': Invalid URL
+            const dummyLink = document.createElement('a');
+            dummyLink.href = url;
+
+            return {
+              protocol: dummyLink.protocol,
+              hostname: dummyLink.hostname,
+              pathname: dummyLink.pathname,
+              query: new URLSearchParams(dummyLink.search),
+              href: dummyLink.href,
+              origin: dummyLink.protocol + '//' + dummyLink.host,
+              port: dummyLink.port,
+              hash: dummyLink.hash
+            };
+          }
+        };
+      }
+
+      // Вставляем полифил для Promise.withResolvers
+      if (!('withResolvers' in Promise)) {
+        (Promise as any).withResolvers = function () {
+          let resolve;
+          let reject;
+          const promise = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+          });
+          return { promise, resolve, reject };
         };
       }
     });
@@ -63,9 +101,11 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
-    (await db).set(req.url || '', html, {
-      EX: +config.key.ttl,
-    });
+    if (!config.cache.bypass) {
+      (await db).set(req.url || '', html, {
+        EX: +config.key.ttl,
+      });
+    }
 
     res.setHeader('content-type', 'text/html; charset=utf-8');
     res.statusCode = 200;

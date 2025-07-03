@@ -19,6 +19,9 @@ export default {
   key: {
     ttl: process.env.TTL_KEY || 60 * 60 * 24 * 7,
   },
+  cache: {
+    bypass: process.env.NOT_CACHING || false,
+  },
   log: {
     file: 'app.log',
   },
