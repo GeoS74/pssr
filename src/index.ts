@@ -16,6 +16,7 @@ const browser = puppeteer.launch({
 const server: Server<typeof IncomingMessage, typeof ServerResponse> = createServer();
 
 server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMessage>): Promise<void> => {
+  const targetURL = `http://${config.react.host}:${config.react.port}${req.url}`;
   try {
     const cache = await (await db).get(req.url || '');
 
@@ -71,7 +72,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
     res.end(html);
   } catch (error) {
     if (_isNodeError(error)) {
-      logger.error(error.message);
+      logger.error(`${error.message} ${targetURL}`);
       res.setHeader('content-type', 'application/json');
       res.statusCode = 500;
       res.end(_errorToJSON('internal server error'));
