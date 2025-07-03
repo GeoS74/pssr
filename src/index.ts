@@ -19,10 +19,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
   const targetURL = `http://${config.react.host}:${config.react.port}${req.url}`;
   try {
 
-    console.log('targetURL ', targetURL);
-
     if (!config.cache.bypass) {
-      console.log('cache on');
       const cache = await (await db).get(req.url || '');
 
       if (cache) {
@@ -31,8 +28,6 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
         res.end(cache);
         return;
       }
-    } else {
-      console.log('cache off');
     }
 
     let page: Page | null = await (await browser).newPage();
