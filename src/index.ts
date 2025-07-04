@@ -39,16 +39,7 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
           try {
             // Если URL валидный - парсим стандартным способом
             const parsed = new URL(url);
-            return {
-              protocol: parsed.protocol,
-              hostname: parsed.hostname,
-              pathname: parsed.pathname,
-              query: parsed.searchParams,
-              href: parsed.href,
-              origin: parsed.origin,
-              port: parsed.port,
-              hash: parsed.hash
-            };
+            return parsed;
           } catch (e) {
             // Фоллбек для невалидных URL
             //Может быть такая ошибка TypeError: Failed to construct 'URL': Invalid URL
