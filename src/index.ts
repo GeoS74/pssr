@@ -92,6 +92,12 @@ server.on('request', async (req: IncomingMessage, res: ServerResponse<IncomingMe
       return;
     }
 
+    if (html.search('404: страница не найдена') !== -1) {
+      res.statusCode = 404;
+      res.end(html);
+      return;
+    }
+
     if (!config.cache.bypass) {
       (await db).set(req.url || '', html, {
         EX: +config.key.ttl,
